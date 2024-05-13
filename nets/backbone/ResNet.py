@@ -263,7 +263,7 @@ def ResNet50(input_image):
     x = layers.ReLU()(x)
 
     # (300, 300, 64)
-    x = layers.MaxPool2D(pool_size=3, strides=2, padding='SAME')(x)
+    x = layers.MaxPool2D(pool_size=3, strides=2, padding='same')(x)
 
     # (150, 150, 64)
     x = make_layer([64, 64, 256], 2, 'conv_2x', strides=1)(x)
