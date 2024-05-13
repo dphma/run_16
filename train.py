@@ -17,7 +17,6 @@ import config.config as cfg
 
 from tensorflow.keras import optimizers, Input, models, utils
 import tensorflow as tf
-tf.config.run_functions_eagerly(False)
 import numpy as np
 import os
 
