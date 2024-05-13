@@ -1,22 +1,9 @@
-# -*- coding: utf-8 -*-
-# @File : ResNet.py
-# @Author: Runist
-# @Time : 2020/9/6 13:16
-# @Software: PyCharm
-# @Brief: ResNet 的 backbone
-
 from tensorflow.keras import layers, models
-
 
 class BasicResBlock(layers.Layer):
 
     def __init__(self, filters, strides=1, **kwargs):
-        """
-
-        :param filters: 卷积核的数量
-        :param strides: 为1时候不改变特征层宽高，为2就减半
-        :param kwargs:
-        """
+      
         filter1, filter2, filter3 = filters
         super(BasicResBlock, self).__init__(**kwargs)
 
@@ -36,13 +23,7 @@ class BasicResBlock(layers.Layer):
         self.add = layers.Add()
 
     def call(self, inputs, training=False, **kwargs):
-        """
-
-        :param inputs: 输入Tensor
-        :param training: 用在训练过程和预测过程中，控制其生效与否
-        :param kwargs:
-        :return:
-        """
+        
         x = self.conv1(inputs)
         x = self.bn1(x, training=training)
         x = self.relu(x)
@@ -63,12 +44,7 @@ class BasicResBlock(layers.Layer):
 class BottleneckResBlock(layers.Layer):
 
     def __init__(self, filters, strides=1, **kwargs):
-        """
-
-        :param filters: 卷积核的数量
-        :param strides: 为1时候不改变特征层宽高，为2就减半
-        :param kwargs:
-        """
+       
         filter1, filter2, filter3 = filters
         super(BottleneckResBlock, self).__init__(**kwargs)
 
@@ -91,13 +67,7 @@ class BottleneckResBlock(layers.Layer):
         self.add = layers.Add()
 
     def call(self, inputs, training=False, **kwargs):
-        """
-
-        :param inputs: 输入Tensor
-        :param training: 用在训练过程和预测过程中，控制其生效与否
-        :param kwargs:
-        :return:
-        """
+      
         x = self.shortcut(inputs)
         x = self.shortcut_bn(x, training=training)
         shortcut = self.relu(x)
@@ -122,12 +92,7 @@ class BottleneckResBlock(layers.Layer):
 class BasicResTDBlock(layers.Layer):
 
     def __init__(self, filters, strides=1, **kwargs):
-        """
-
-        :param filters: 卷积核的数量
-        :param strides: 为1时候不改变特征层宽高，为2就减半
-        :param kwargs:
-        """
+       
         filter1, filter2, filter3 = filters
         super(BasicResTDBlock, self).__init__(**kwargs)
 
@@ -147,13 +112,7 @@ class BasicResTDBlock(layers.Layer):
         self.add = layers.Add()
 
     def call(self, inputs, training=False, **kwargs):
-        """
-
-        :param inputs: 输入Tensor
-        :param training: 用在训练过程和预测过程中，控制其生效与否
-        :param kwargs:
-        :return:
-        """
+        
         x = self.conv1_td(inputs)
         x = self.bn1_td(x, training=training)
         x = self.relu(x)
@@ -174,12 +133,7 @@ class BasicResTDBlock(layers.Layer):
 class BottleneckResTDBlock(layers.Layer):
 
     def __init__(self, filters, strides=1, **kwargs):
-        """
-
-        :param filters: 卷积核的数量
-        :param strides: 为1时候不改变特征层宽高，为2就减半
-        :param kwargs:
-        """
+       
         filter1, filter2, filter3 = filters
         super(BottleneckResTDBlock, self).__init__(**kwargs)
 
@@ -203,13 +157,7 @@ class BottleneckResTDBlock(layers.Layer):
         self.add = layers.Add()
 
     def call(self, inputs, training=False, **kwargs):
-        """
-
-        :param inputs: 输入Tensor
-        :param training: 用在训练过程和预测过程中，控制其生效与否
-        :param kwargs:
-        :return:
-        """
+       
         x = self.shortcut_td(inputs)
         x = self.shortcut_bn_td(x, training=training)
         shortcut = self.relu(x)
@@ -232,14 +180,7 @@ class BottleneckResTDBlock(layers.Layer):
 
 
 def make_layer(filters, num, name, strides=2):
-    """
-
-    :param filters: 卷积核的数量
-    :param num: 堆叠残差块的数量
-    :param name: 这一层卷积的名字
-    :param strides: 步长
-    :return:
-    """
+   
     layer_list = [BottleneckResBlock(filters, strides=strides)]
     for _ in range(num):
         layer_list.append(BasicResBlock(filters))
@@ -250,8 +191,6 @@ def make_layer(filters, num, name, strides=2):
 def ResNet50(input_image):
     """
     ResNet50 backbone
-    :param input_image: 输入图像Tensor
-    :return: 特征层
     """
     # input_shape(None, 600, 600, 3)
     x = layers.ZeroPadding2D((3, 3))(input_image)
@@ -279,14 +218,7 @@ def ResNet50(input_image):
 
 
 def classifier_layers(x):
-    """
-    事实上这里的卷积核数量是和ResNet50最后几层是一样的，因为在backbone部分，并没有对其分类
-    在RPN处理之后需要对它进行分类。TimeDistributed是对RoiPooling层的(None, 128, 14, 14, 1024)
-    第二个维度进行操作，从RoiPooling的输出上看，它是将所有resize的结果都一层层堆叠起来
-    在维度信息上没有关联性，所以要用TimeDistributed对每层分别处理
-    :param x: 输入Tensor
-    :return:
-    """
+  
     x = BottleneckResTDBlock([512, 512, 2048], strides=2)(x)
     x = BasicResTDBlock([512, 512, 2048])(x)
     x = BasicResTDBlock([512, 512, 2048])(x)
