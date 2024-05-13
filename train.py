@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# @File : train.py
-# @Author: Runist
-# @Time : 2020-09-11 11:59
-# @Software: PyCharm
-# @Brief: 训练文件
-
 from nets.backbone.ResNet import ResNet50
 from nets import frcnn
 
@@ -23,14 +16,7 @@ import os
 
 class CosineAnnealSchedule(optimizers.schedules.LearningRateSchedule):
     def __init__(self, epoch, train_step, lr_max, lr_min, warmth_rate=0.2):
-        """
-        学习率调节函数
-        :param epoch: 训练轮次
-        :param train_step: 一轮训练次数
-        :param lr_max: 最大学习率
-        :param lr_min: 最小学习率
-        :param warmth_rate: 预热轮次的占比
-        """
+
         super(CosineAnnealSchedule, self).__init__()
 
         self.total_step = epoch * train_step
@@ -52,13 +38,7 @@ class CosineAnnealSchedule(optimizers.schedules.LearningRateSchedule):
 
 @tf.function
 def rpn_train(model, inputs, y_true):
-    """
-    eager训练模式，需要将loss函数和优化器作为全局变量
-    :param model: rpn model
-    :param inputs: 模型输入
-    :param y_true: 真实标签
-    :return: rpn的loss
-    """
+  
     with tf.GradientTape() as tape:
         y_pred = model(inputs, training=True)
         cls_loss = losses_fn.rpn_cls_loss()(y_true[0], y_pred[0])
@@ -71,13 +51,7 @@ def rpn_train(model, inputs, y_true):
 
 @tf.function
 def classifier_train(model, inputs, y_true):
-    """
-    eager训练模式，需要将loss函数和优化器作为全局变量
-    :param model: classifier model
-    :param inputs: 模型输入
-    :param y_true: 真实标签
-    :return: 分类器loss
-    """
+
     with tf.GradientTape() as tape:
         y_pred = model(inputs, training=True)
         cls_loss = losses_fn.class_loss_cls(y_true[0], y_pred[0])
@@ -108,17 +82,14 @@ def main():
     model_classifier = models.Model([img_input, roi_input], classifier)
     model_all = models.Model([img_input, roi_input], rpn + classifier)
 
-    # 生成38x38x9个先验框
     anchors = get_anchors(cfg.share_layer_shape, cfg.input_shape)
 
-    # 根据先验框解析真实框
     box_parse = BoundingBox(anchors, max_threshold=cfg.rpn_max_overlap, min_threshold=cfg.rpn_min_overlap)
 
     reader = DataReader(cfg.annotation_path, box_parse, cfg.batch_size)
     train_data = reader.generate()
     train_step = len(reader.train_lines) // cfg.batch_size
 
-    # loss相关
     losses = np.zeros((train_step, 4))
     best_loss = np.Inf
 
@@ -129,7 +100,7 @@ def main():
     classifier_optimizer = optimizers.Adam(cls_lr)
 
     for e in range(cfg.epoch):
-        invalid_data = 0        # 记录无效roi数据
+        invalid_data = 0        
         print("Learning rate adjustment, rpn_lr: {}, cls_lr: {}".
           format(rpn_optimizer.learning_rate.numpy(),
                  classifier_optimizer.learning_rate.numpy()))
@@ -138,22 +109,22 @@ def main():
               format(rpn_optimizer._decayed_lr("float32").numpy(),
                      classifier_optimizer._decayed_lr("float32").numpy()))"""
 
-        # keras可视化训练条
+    
         progbar = utils.Progbar(train_step)
         print('Epoch {}/{}'.format(e+1, cfg.epoch))
         for i in range(train_step):
-            # 读取数据
+            
             image, rpn_y, bbox = next(train_data)
 
             loss_rpn = rpn_train(model_rpn, image, rpn_y)
             predict_rpn = model_rpn(image)
 
             img_h, img_w = np.shape(image[0])[:2]
-            # 计算图片输入到rpn的输出shape
+            
             share_layer = predict_rpn[2]
             rpn_height, rpn_width = share_layer.shape[1:-1]
 
-            # 将预测结果进行解码
+            
             anchors = get_anchors(share_layer_shape=(rpn_width, rpn_height), image_shape=(img_w, img_h))
             predict_boxes = box_parse.detection_out(predict_rpn, anchors, confidence_threshold=0)
 
@@ -181,13 +152,13 @@ def main():
             losses[i, 2] = loss_class[0].numpy()
             losses[i, 3] = loss_class[1].numpy()
 
-            # 输出训练过程
+           
             progbar.update(i+1, [('rpn_cls', np.mean(losses[:i+1, 0])),
                                  ('rpn_regr', np.mean(losses[:i+1, 1])),
                                  ('detector_cls', np.mean(losses[:i+1, 2])),
                                  ('detector_regr', np.mean(losses[:i+1, 3]))])
 
-        # 当一个epoch训练完了以后，输出训练指标
+        
         else:
             loss_rpn_cls = np.mean(losses[:, 0])
             loss_rpn_regr = np.mean(losses[:, 1])
