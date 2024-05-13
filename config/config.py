@@ -30,7 +30,7 @@ classifier_regr_std = [8.0, 8.0, 4.0, 4.0]
 
 data_pretreatment = 'random'
 
-#annotation_path = "./config/train.txt"
+annotation_path = '/kaggle/working/new_annotation.txt'
 label = ['nlb', 'nls', 'gls']
 
 num_classes = len(label) + 1
