@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-# @File : config.py
-# @Author: Runist
-# @Time : 2020-09-11 13:54
-# @Software: PyCharm
-# @Brief: 配置文件
-
 rpn_lr = 1e-4
 cls_lr = 1e-5
 
