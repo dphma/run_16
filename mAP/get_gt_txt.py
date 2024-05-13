@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-# @File : get_gt_txt.py
-# @Author: Runist
-# @Time : 2020/5/8 10:36
-# @Software: PyCharm
-# @Brief: 将真实图片转成mAP的txt检测格式
 import os
 import sys
 import config.config as cfg
