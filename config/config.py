@@ -10,7 +10,7 @@ cls_lr = 1e-5
 
 epoch = 50
 
-anchor_box_scales = [128, 256, 512]
+anchor_box_scales = [64, 128, 256]
 anchor_box_ratios = [[1, 1], [1, 2], [2, 1]]
 
 batch_size = 8
