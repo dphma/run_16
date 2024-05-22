@@ -3,7 +3,7 @@ import tensorflow as tf
 import numpy as np
 
 
-def rpn_cls_loss(ratio=8):
+def rpn_cls_loss(ratio=6):
     def cls_loss(y_true, y_pred):
         
         label_true = y_true[:, :, -1]       
