@@ -1,5 +1,5 @@
-rpn_lr = 1e-4
-cls_lr = 1e-5
+rpn_lr = 0.001
+cls_lr = 0.001
 
 epoch = 50
 
