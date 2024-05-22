@@ -44,7 +44,7 @@ def rpn_cls_loss(ratio=3):
     return cls_loss
 
 
-def rpn_regr_loss(sigma=1.5):
+def rpn_regr_loss(sigma=1):
     sigma_squared = sigma ** 2
 
     def smooth_l1(y_true, y_pred):
