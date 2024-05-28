@@ -244,8 +244,8 @@ class FasterRCNN:
 
 
 if __name__ == '__main__':
-    img_path = "street.jpg"
-    faster_rcnn = FasterRCNN("./model/frcnn_1.8062.h5")
+    img_path = "path to image"
+    faster_rcnn = FasterRCNN("path to model.h5")
 
     image = Image.open(img_path)
     image = faster_rcnn.detect_image(image)
