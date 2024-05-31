@@ -198,7 +198,7 @@ class FasterRCNN:
         top_boxes[:, 2] = top_boxes[:, 2] * old_w
         top_boxes[:, 3] = top_boxes[:, 3] * old_h
 
-        font = ImageFont.truetype(font='config/simhei.ttf', size=np.floor(2e-2 * old_w + 0.5).astype('int32'))
+        font = ImageFont.truetype(font='D:/Dung/faster-visual/run_16-main/config/simhei.ttf', size=np.floor(2e-2 * old_w + 0.5).astype('int32'))
         thickness = (old_w + old_h) // old_w * 2
 
         for i, c in enumerate(top_label):
@@ -224,18 +224,23 @@ class FasterRCNN:
             print(label)
             draw = ImageDraw.Draw(image)
        
-            label_size = draw.textsize(label, font)
+            #label_size = draw.textsize(label, font)
+            label_size = font.getmask(label).getbbox()
+
             label = label.encode('utf-8')
 
             
             if top - label_size[1] >= 0:
-                text_origin = np.array([left, top - label_size[1]])
+                #text_origin = np.array([left, top - label_size[1]])
+                text_width, text_height = label_size[2] - label_size[0], label_size[3] - label_size[1]
+                text_origin = np.array([left, top - text_height])
             else:
                 text_origin = np.array([left, top + 1])
 
            
             draw.rectangle([left, top, right, bottom], outline=self.colors[c], width=thickness)
-            draw.rectangle([tuple(text_origin), tuple(text_origin + label_size)], fill=self.colors[c])
+            #draw.rectangle([tuple(text_origin), tuple(text_origin + label_size)], fill=self.colors[c])
+            draw.rectangle([tuple(text_origin), tuple((text_origin[0] + text_width, text_origin[1] + text_height))], fill=self.colors[c])
             
             draw.text(text_origin, str(label, 'UTF-8'), fill=(0, 0, 0), font=font)
             del draw
@@ -244,10 +249,9 @@ class FasterRCNN:
 
 
 if __name__ == '__main__':
-    img_path = "path to image"
-    faster_rcnn = FasterRCNN("path to model.h5")
+    img_path = 'D:/Dung/nls_12.jpg'
+    faster_rcnn = FasterRCNN('D:/Dung/model/frcnn_2.0951.weights.h5')
 
     image = Image.open(img_path)
     image = faster_rcnn.detect_image(image)
     image.show()
-
